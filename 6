@@ -1,0 +1,86 @@
+Step #1 Configure the Docker hosts
+<syntaxhighlight lang=bash>
+Manager Node – 172.18.111.19 (hostname - manager)
+Worker Node1 – 172.18.111.61 (hostname – worker1)
+Worker Node2 – 172.18.111.62 (hostname - worker2)
+Worker Node3 – 172.18.111.63 (hostname – worker3)
+Worker Node4 – 172.18.111.64 (hostname - worker4)
+</syntaxhighlight>
+Step #2 Install and Run Docker Service
+<syntaxhighlight lang=bash>
+# apt-get update
+# apt-get install apt-transport-https ca-certificates curl software-properties-common -y
+# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+# add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+# apt-get update
+# apt-get install docker-ce
+# apt-get install docker-compose
+</syntaxhighlight>
+Step #3 Configure the Manager Node for Swarm Cluster Initialization
+<syntaxhighlight lang=bash>
+# docker swarm init --advertise-addr 172.18.111.19
+</syntaxhighlight>
+Step #4 Configure Worker Nodes (Worker1 ,2 ,3 ,4) to join the Swarm Cluster
+<syntaxhighlight lang=bash>
+# docker swarm join --token SWMTKN-1-4htf3vnzmbhc88vxjyguipo91ihmutrxi2p1si2de4whaqylr6-3oed1hnttwkalur1ey7zkdp9l 172.18.111.19:2377
+</syntaxhighlight>
+Step #5 Verify the Swarm Cluster
+<syntaxhighlight lang=bash>
+# docker node ls
+
+7k52p *   Manager     Ready    Active      Leader     19.03.5
+ekdbk     Worker1     Ready    Active                 19.03.5
+87xdq     Worker2     Ready    Active                 19.03.5
+kpji1     Worker3     Ready    Active                 19.03.5
+l3r7u     Worker4     Ready    Active                 19.03.5
+</syntaxhighlight>
+Step #6 Deploy new Service on Swarm Cluster
+<syntaxhighlight lang=bash>
+% deploy testing with nginx images 
+# docker service create --name web --publish 80:80 --replicas 2 nginx
+
+% deploy WebApp with docker-compose file 
+# docker stack deploy -c phpmyadmin.yml tools
+</syntaxhighlight>
+<syntaxhighlight lang=bash>
+version: '3.5'
+services:
+   myadmin:
+     image: registry.mcs.psu.ac.th/myadmin:latest
+     ports:
+       - "801:80"
+     deploy:
+       mode: replicated
+       replicas: 4
+</syntaxhighlight>
+Step #7 To check the newly created service
+<syntaxhighlight lang=bash>
+# docker service ls
+%
+idbl8ln0n5tz  tools_myadmin  replicated  4/4 registry.mcs.psu.ac.th/myadmin:latest *:801->80/tcp
+%
+# docker service ps tools_myadmin
+%
+xyz0juejdhq2        tools_myadmin.1       registry.mcs.psu.ac.th/myadmin:latest s64  Running Running 2 hours ago                                       
+ue7ed6uydhqt        tools_myadmin.2       registry.mcs.psu.ac.th/myadmin:latest s61  Running Running 2 hours ago                                       
+gjogtt9bli3z        tools_myadmin.3       registry.mcs.psu.ac.th/myadmin:latest s62  Running Running 2 hours ago                                       
+kx03z9qh3pt4        tools_myadmin.4       registry.mcs.psu.ac.th/myadmin:latest s63  Running Running 2 hours ago                  
+%
+</syntaxhighlight>
+Step #8 scaling replicas
+<syntaxhighlight lang=bash>
+# docker service scale tools_myadmin=5
+</syntaxhighlight>
+
+remove services
+<syntaxhighlight lang=bash>
+# docker service scale tools_myadmin=0
+# docker service rm tools_myadmin
+# docker volume rm tools_myadmin
+</syntaxhighlight>
+
+extension:
+in case using local registry must be pull images on workers hosts
+<syntaxhighlight lang=bash>
+# docker pull registry.mcs.psu.ac.th/myadmin:latest
+</syntaxhighlight>
