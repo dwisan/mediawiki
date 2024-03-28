@@ -1,0 +1,846 @@
+== What is Docker ==
+[[File:Docker facebook share.png|link=]]
+* '''Software Container''' เป็นการสร้างสภาพแวดล้อมสำหรับ software โดยแยกออกออกมาเพื่อไม่ให้กวนกับ software อื่น ๆ บนระบบปฏิบัติการเดียวกัน สามารถนำ Container ไปทำงานบนเครื่องไหนก็ได้จะได้ผลเหมือนกัน
+* '''Docker''' เป็น engine ในการจัดการ Software Container ที่ใช้งานได้ง่าย ไม่ซับซ้อน เป็นที่แพร่หลาย
+* Container VS VM<br>[[File:Docker-containerized-and-vm-transparent-bg.png|link=]]<br>*image from https://www.docker.com
+
+== Pain point ==
+* ต้องติดตั้ง ตั้งค่า server ที่จะรัน Application
+* ไม่สามารถติดตั้งหรืออัพเกรด Library บางอย่างบน OS ได้เนื่องจากกระทบกับ Application อื่น
+* เครื่อง Dev กับ Production ไม่เหมือนกัน
+
+== Docker Architecture ==
+=== Docker Engine ===
+* Docker Client คือพวก CLI ของ Docker ที่ใช้ในการจัดการ
+* Docker Daemon คือ service ของ Docker ที่รันบน Server เราจะเรียก Server นี้ว่า Docker Machine
+=== Docker Hub ===
+* เป็น Repository หรือเรียกว่า Registry ทำหน้าที่ให้บริการ Docker Image มี Image ของผู้พัฒนาโปรแกรมต่าง ๆ ให้ใช้งาน มีการจัดเก็บ version ของ image อย่างเป็นระบบ มีเอกสารคู่มือการใช้งาน Image 
+โดยให้บริการที่ https://hub.docker.com ใช้งานได้ฟรี
+* สามารถสร้าง Private Registry บน Server เองได้
+=== Docker Image ===
+* เป็น Template ที่สร้างขึ้นโดยนักพัฒนาเป็นชุดของ Software/Library สามารถดึง('''pull''')มาจาก Registry เพื่อใช้งานหรือสร้างขึ้นมาเองได้
+* เป็นไฟล์แบบอ่านอย่างเดียว
+=== Docker Container ===
+* คือ Image ที่ถูกรันขึ้นมาใช้งาน โดยจะมีสภาพแวดล้อมตาม Image ต้นแบบ
+* ไฟล์หรืออะไรที่ถูกสร้างขึ้นมาใน Container จะหายไปเมื่อมีการลบ Container
+* สามารถการเปลี่ยนแปลงใน Container กลับไปเป็น Image ได้เรียกว่า '''commit'''
+[[File:Docker-image-container.png|link=]]
+
+== Docker Machine ==
+* Docker Desktop for Windows https://docs.docker.com/docker-for-windows/install/
+* Docker for Ubuntu https://docs.docker.com/install/linux/docker-ce/ubuntu/
+
+== Workshop 1 : pull image ==
+เปิด powshell ขึ้นมา แล้วพิมพ์คำสั่งในการ pull image
+<syntaxhighlight lang=powershell>
+docker pull mysql:latest
+docker pull alpine
+</syntaxhighlight>
+
+แสดง image ที่อยู่บนเครื่อง
+<syntaxhighlight lang=powershell>
+docker images
+</syntaxhighlight>
+<syntaxhighlight lang=powershell>
+REPOSITORY                 TAG                    IMAGE ID            CREATED             SIZE
+mysql                      latest                 91dadee7afee        2 days ago          477MB
+ubuntu                     latest                 47b19964fb50        4 weeks ago         88.1M
+alpine                     latest                 caf27325b298        5 weeks ago         5.53MB
+</syntaxhighlight>
+
+== Workshop 2 : General Commands ==
+{| class="wikitable"
+|-
+|Command
+|Description
+|-
+|'''docker build'''
+|Build an image from a Dockerfile
+|-
+|'''docker commit'''
+|Create a new image from a container’s changes
+|-
+|'''docker container'''
+|Manage containers
+|-
+|'''docker cp'''
+|Copy files/folders between a container and the local filesystem
+|-
+|'''docker exec'''
+|Run a command in a running container
+|-
+|'''docker image'''
+|Manage images
+|-
+|'''docker images'''
+|List images
+|-
+|'''docker inspect'''
+|Return low-level information on Docker objects
+|-
+|'''docker logs'''
+|Fetch the logs of a container
+|-
+|'''docker network'''
+|Manage networks
+|-
+|'''docker ps'''
+|List containers
+|-
+|'''docker pull'''
+|Pull an image or a repository from a registry
+|-
+|'''docker push'''
+|Push an image or a repository to a registry
+|-
+|'''docker restart'''
+|Restart one or more containers
+|-
+|'''docker rm'''
+|Remove one or more containers
+|-
+|'''docker rmi'''
+|Remove one or more images
+|-
+|'''docker run'''
+|Run a command in a new container
+|-
+|'''docker stats'''
+|Display a live stream of container(s) resource usage statistics
+|-
+|'''docker stop'''
+|Stop one or more running containers
+|-
+|'''docker tag'''
+|Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE
+|-
+|'''docker top'''
+|Display the running processes of a container
+|-
+|'''docker volume'''
+|Manage volumes
+|}
+https://docs.docker.com/engine/reference/commandline/docker/
+
+== Workshop 3 : push image ==
+* สมัครบัญชี https://hub.docker.com
+* เข้าสู่ระบบแล้วสร้าง repository <br>[[File:Create-repo.PNG|link=]]
+* tag image เป็นชื่อบัญชีที่สร้าง
+<syntaxhighlight lang=powershell>
+docker tag alpine:latest [accountname]/alpine:latest
+</syntaxhighlight>
+* แสดงรายการ image
+<syntaxhighlight lang=powershell>
+docker images
+</syntaxhighlight>
+<syntaxhighlight lang=powershell>
+alpine                     latest                 caf27325b298        5 weeks ago         5.53MB
+supawit/alpine             latest                 caf27325b298        5 weeks ago         5.53MB
+</syntaxhighlight>
+* login เข้า hub.docker.com ด้วยบัญชีที่สร้าง
+<syntaxhighlight lang=powershell>
+docker login -u [accountname]
+</syntaxhighlight>
+* push image ที่ tag ไว้ขึ้น repository บน registry
+<syntaxhighlight lang=powershell>
+docker push [accountname]/alpine:latest
+</syntaxhighlight>
+
+==  Workshop 4 : Run Container ==
+=== Interactive ===
+* run container แบบ interactive terminal โดยให้ชื่อ container เป็น nginx และ map port 8080 ที่ docker machine เข้าไปเป็น port 80 ใน container
+<syntaxhighlight lang=powershell>
+docker run -it --rm --name nginx -p 8080:80 nginx
+</syntaxhighlight>
+* ทดสอบเปิด browser http://localhost:8080
+* ตรวจสอบ container 
+<syntaxhighlight lang=powershell>
+docker ps -a
+</syntaxhighlight>
+* Ctrl+C เพื่อจบการทำงาน
+=== Detach ===
+* run container แบบ detach 
+<syntaxhighlight lang=powershell>
+docker run -it -d --name nginx -p 8080:80 nginx
+</syntaxhighlight>
+* ทดสอบเปิด browser http://localhost:8080
+* ตรวจสอบ container 
+<syntaxhighlight lang=powershell>
+docker ps -a
+</syntaxhighlight>
+* ทดสอบเข้า shell ใน container ด้วยการส่งคำสั่งไปทำงานบน container ที่ทำงานอยู่
+<syntaxhighlight lang=powershell>
+docker exec -it nginx bash
+</syntaxhighlight>
+* การหยุด/เริ่ม container
+<syntaxhighlight lang=powershell>
+docker stop nginx
+docker start nginx
+</syntaxhighlight>
+* ลบ container
+<syntaxhighlight lang=powershell>
+docker rm nginx
+</syntaxhighlight>
+
+== Docker Network ==
+* เบื้องต้อน docker จะมี network มาให้ 3 รูปแบบ
+<syntaxhighlight lang=powershell>
+PS D:\> docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+749dc07193c8        bridge              bridge              local
+1e55901ecd55        host                host                local
+98f00c775b7d        none                null                local
+</syntaxhighlight>
+* '''bridge''' เป็น default network ที่ container เชื่อมสู่ภายนอกผ่าน virtual switch docker0 ผ่าน routing ของ virtual network ที่สร้างขึ้นด้วย docker engine
+* '''host''' เป็น network ที่ container ใช้ network interface ของ docker machine host
+* '''none''' เป็น network loopback ของ container ไม่มีการเชื่อมต่อสู่ภายนอก
+<hr>
+* โดยปกติกรณีสั่ง run container ถ้าไม่ได้ระบุ option เกี่ยวกับ network, container จะต่อเข้ากับ network bridge และกำหนด ip address ให้โดยอัตโนมัติ<br>[[File:Bridge1.png|link=]]
+<syntaxhighlight lang=powershell>
+PS D:\> docker run -d --name web nginx
+4b0f396b24625fdae8066723efe76bb53b2e60031780e1b5bb168ace1161b5fa
+PS D:\> docker inspect bridge
+[
+    {
+        "Name": "bridge",
+        "Id": "749dc07193c80a8efd89629be5ab4abf8252fdb04d837ebec95176bdde50c293",
+        "Created": "2019-03-12T03:41:54.6066118Z",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": [
+                {
+                    "Subnet": "172.17.0.0/16",
+                    "Gateway": "172.17.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "4b0f396b24625fdae8066723efe76bb53b2e60031780e1b5bb168ace1161b5fa": {
+                "Name": "nginx",
+                "EndpointID": "d884ba8b25e4f665a6f232d9971c4255b9c53b54e2c222c94926a44970c80ba2",
+                "MacAddress": "02:42:ac:11:00:02",
+                "IPv4Address": "172.17.0.2/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {
+            "com.docker.network.bridge.default_bridge": "true",
+            "com.docker.network.bridge.enable_icc": "true",
+            "com.docker.network.bridge.enable_ip_masquerade": "true",
+            "com.docker.network.bridge.host_binding_ipv4": "0.0.0.0",
+            "com.docker.network.bridge.name": "docker0",
+            "com.docker.network.driver.mtu": "1500"
+        },
+        "Labels": {}
+    }
+]
+</syntaxhighlight>
+* option เกี่ยวกับ network ตอน run container
+--dns=x.x.x.x(default จะใช้ --name,--net-alias)<br>
+--net="<bridge/none/host/custom>"<br>
+--net-alias="xxxx"<br>
+--add-host="xxxx"<br>
+--mac-address="xxxx"<br>
+--ip="x.x.x.x"<br>
+-p, --publish <host-port>:<container-port><br>
+-P, --publish-all Auto map port<br>
+
+* สามารถสร้าง virtual network เพิ่มเติมได้ เพื่อจัดระเบียบและแบ่งส่วน network ของ container ออกจากกัน แนะนำให้ production ควรทำแบบนีั
+<syntaxhighlight lang=powershell>
+docker network create my_bridge
+</syntaxhighlight>
+<syntaxhighlight lang=powershell>
+docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+749dc07193c8        bridge              bridge              local
+1e55901ecd55        host                host                local
+4d49d6a516f3        my_bridge           bridge              local
+98f00c775b7d        none                null                local
+</syntaxhighlight>
+option เพิ่มเติมในการส้ราง network
+--subnet= xx เช่น 10.10.0.0/24<br>
+--ip-range = xx ระบุ ip ที่จะแจกให้ container<br>
+--gateway = xx ระบุ ip ของ gateway<br>
+--opt = custom options เช่น --opt="com.docker.network.mtu"="9000"<br>
+* run container โดยใช้ network ที่สร้างขึ้น
+<syntaxhighlight lang=powershell>
+docker run -d --net=my_bridge --name db mongo
+</syntaxhighlight>
+[[File:Bridge2.png|link=]]
+* สามารถให้ container เชื่อมต่อกับหลาย ๆ network ได้เช่นเชื่อม container web เขากับ network my_bridge
+<syntaxhighlight lang=powershell>
+docker network connect my_bridge web
+</syntaxhighlight>
+[[File:Bridge3.png|link=]]
+* ตัด container จาก network
+<syntaxhighlight lang=powershell>
+docker network disconnect my_bridge web
+</syntaxhighlight>
+* Network ชนิดอื่น ๆ ของ docker
+- macvlan<br>
+- overlay<br>
+
+== Workshop 5 : Internal Network ==
+[[File:Docker-workshop-network.png|link=]]
+* สร้าง network ขึ้นมาให้ container เชื่อมต่อ
+<syntaxhighlight lang=powershell>
+docker network create --subnet=10.10.0.0/24 --gateway=10.10.0.1 internal
+</syntaxhighlight>
+* run container ที่ web1, web2, reverse-proxy
+<syntaxhighlight lang=powershell>
+docker run -d --net internal --net-alias web1 --name web1 supawit/nginx:web1
+</syntaxhighlight>
+<syntaxhighlight lang=powershell>
+docker run -d --net internal --net-alias web2 --name web2 supawit/nginx:web2
+</syntaxhighlight>
+<syntaxhighlight lang=powershell>
+docker run -d --net internal --net-alias reverse-proxy -p 8080:8080 --name reverse-proxy  supawit/nginx:reverse-proxy
+</syntaxhighlight>
+* ตรวจสอบ container
+<syntaxhighlight lang=powershell>
+docker ps
+CONTAINER ID        IMAGE                         COMMAND                  CREATED             STATUS              PORTS                            NAMES
+17597e0e0c2a        supawit/nginx:reverse-proxy   "nginx -g 'daemon of…"   3 minutes ago       Up 3 minutes        80/tcp, 0.0.0.0:8080->8080/tcp   reverse-proxy
+3aa9aa4e1ac8        supawit/nginx:web2            "nginx -g 'daemon of…"   3 minutes ago       Up 3 minutes        80/tcp                           web2
+4aa35567534f        supawit/nginx:web1            "nginx -g 'daemon of…"   5 minutes ago       Up 5 minutes        80/tcp                           web1
+</syntaxhighlight>
+* ดูรายละเอียด network
+<syntaxhighlight lang=powershell>
+docker inspect internal
+[
+    {
+        "Name": "internal",
+        "Id": "d29a2364bf2a1b412bea30935d5b9e31ee6bfd611aad21e56fa6142dd6e952bb",
+        "Created": "2019-03-12T07:59:15.6694828Z",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": {},
+            "Config": [
+                {
+                    "Subnet": "10.10.0.0/24",
+                    "Gateway": "10.10.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "17597e0e0c2afa2ee3706769ddb06d740e91dbfd0d5ae919ae281e5c4056044c": {
+                "Name": "reverse-proxy",
+                "EndpointID": "4fdfb543c1583036364b7bfce9bc6fd1788b7457ccf535bfde8c8d0bca0229e7",
+                "MacAddress": "02:42:0a:0a:00:04",
+                "IPv4Address": "10.10.0.4/24",
+                "IPv6Address": ""
+            },
+            "3aa9aa4e1ac8cf49781b8cf488416d6cf0f385c4af0f041b364f83f39f0cba4b": {
+                "Name": "web2",
+                "EndpointID": "c48238943308d64e66eb964fad3dfb0d4be778ce401444764e643adfee09138c",
+                "MacAddress": "02:42:0a:0a:00:03",
+                "IPv4Address": "10.10.0.3/24",
+                "IPv6Address": ""
+            },
+            "4aa35567534f8497f60b3161c7e285a7d9fd355cf0cec225070013a117bae6ff": {
+                "Name": "web1",
+                "EndpointID": "6679a0bec7a8a25787250c075333da083fc76a4da6035060431af888197061ff",
+                "MacAddress": "02:42:0a:0a:00:02",
+                "IPv4Address": "10.10.0.2/24",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {},
+        "Labels": {}
+    }
+]
+</syntaxhighlight>
+* สามารถดู log ของ container ประกอบได้ด้วยคำสั่ง
+<syntaxhighlight lang=powershell>
+docker logs -f web1
+</syntaxhighlight>
+
+* ดูการตั้งค่า reverse proxy
+<syntaxhighlight lang=powershell>
+docker exec reverse-proxy cat /etc/nginx/conf.d/reverse.conf
+upstream web {
+        server web1:80;
+        server web2:80;
+}
+
+server {
+        listen 8080;
+        location / {
+                proxy_pass http://web;
+                proxy_set_header Host $http_host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+}
+</syntaxhighlight>
+* workshop clean up
+<syntaxhighlight lang=powershell>
+docker stop web1 web2 reverse-proxy
+docker rm web1 web2 reverse-proxy
+docker network rm internal
+docker image rm supawit/nginx:web1 supawit/nginx:web2 supawit/nginx:reverse-proxy
+</syntaxhighlight>
+
+
+== Docker Storage ==
+เมื่อ run container ข้อมูลที่ถูกสร้างขึ้นภายใน container จะอยู่ข้างใน container และข้อมูลเหล่านั้นจะหายไปเมื่อมีการลบ container ไป
+docker จึงมีวิธีจัดการข้อมูลที่ทำงานใน container ให้อยู่ถาวรได้โดยมีอยู่สามแบบได้แก่
+* '''Volumes''' ข้อมูลจะถูกจัดเก็บใน /var/lib/docker/volumes/ บน docker machine host หรือใช้ driver อื่นเพื่อเชื่อม network file system เป็นต้น ไม่ควรยุ่งกับ file นี้แบบ manual ต้องให้ process ของ docker จัดการ
+* '''Bind mounts''' เป็นการ map file หรือ directory จาก docker machine host เข้าไปใน container สามารถจัดการไฟล์ได้แบบ manual
+* '''tmpfs mounts''' ใช้งานได้เฉพาะ Linux docker machine host โดยเก็บข้อมูลไว้ใน RAM ของ docker machine host ข้อมูลจะหายไปเมื่อปิด container
+[[File:Types-of-mounts.png|link=]]<br>
+https://docs.docker.com/storage/
+
+=== Volume ===
+[[File:Types-of-mounts-volume.png|link=]]<br>
+https://docs.docker.com/storage/volumes/
+* สามารถใช้ option '''-v''' ได้แต่ในอนาคตจะมีการยกเลิกการใช้งาน option ที่แนะนำคือ --mount ซึ่งมีลักษณะการใช้งานเป็น
+<syntaxhighlight lang=powershell>
+-v /host-volume:/path-in-container:[ro/rw]
+
+--mount type=bind,source=/host-volume,target=/path-in-container,(readonly)
+</syntaxhighlight>
+==== local volume ====
+สร้าง volume
+<syntaxhighlight lang=powershell>
+docker volume create my-vol
+</syntaxhighlight>
+แสดงรายการ volume
+<syntaxhighlight lang=powershell>
+docker volume ls
+DRIVER              VOLUME NAME
+local               my-vol
+</syntaxhighlight>
+แสดงรายละเอียด volume
+<syntaxhighlight lang=powershell>
+docker volume inspect my-vol
+[
+    {
+        "CreatedAt": "2019-03-13T09:53:44Z",
+        "Driver": "local",
+        "Labels": {},
+        "Mountpoint": "/var/lib/docker/volumes/my-vol/_data",
+        "Name": "my-vol",
+        "Options": {},
+        "Scope": "local"
+    }
+]
+</syntaxhighlight>
+
+*ลบ volume
+<syntaxhighlight lang=powershell>
+docker volume rm my-vol
+</syntaxhighlight>
+
+* run container แบบใช้งาน volume
+<syntaxhighlight lang=powershell>
+docker run -d --name devtest --mount source=myvol2,target=/app nginx:alpine
+</syntaxhighlight>
+
+<syntaxhighlight lang=powershell>
+docker run -d --name devtest -v myvol2:/app nginx:alpine
+</syntaxhighlight>
+
+* clean up
+<syntaxhighlight lang=powershell>
+docker stop devtest
+docker rm devtest
+docker volume rm myvol2
+</syntaxhighlight>
+
+==== share volume across docker machine host ====
+* ติดตั้ง plugin 
+<syntaxhighlight lang=powershell>
+docker plugin install --grant-all-permissions vieux/sshfs
+</syntaxhighlight>
+
+* สร้าง volume แบบใช้งาน sshfs
+<syntaxhighlight lang=powershell>
+docker volume create --driver vieux/sshfs -o sshcmd=user1@10.0.0.100:/home/user1/dockervol -o password=testpassword sshvol
+</syntaxhighlight>
+
+* run container โดย mount sshvolume เข้าไปใน container, สามารถ run container ลักษณะนี้จากหลาย ๆ เครื่องได้
+<syntaxhighlight lang=powershell>
+docker run -d --name sshfs-container -v sshvol:/app nginx
+</syntaxhighlight>
+
+=== Bind mounts ===
+[[File:Types-of-mounts-bind.png|link=]]<br>
+https://docs.docker.com/storage/bind-mounts/
+* run contain แบบใช้ bind mount
+<syntaxhighlight lang=powershell>
+docker run -d -it --name devtest --mount type=bind,source="$(pwd)"/target,target=/app nginx
+</syntaxhighlight>
+
+<syntaxhighlight lang=powershell>
+docker run -d -it --name devtest -v "$(pwd)"/target:/app nginx
+</syntaxhighlight>
+
+* run contain แบบใช้ bind mount แบบ read only
+
+<syntaxhighlight lang=powershell>
+docker run -d -it --name devtest --mount type=bind,source="$(pwd)"/target,target=/app,readonly nginx
+</syntaxhighlight>
+
+<syntaxhighlight lang=powershell>
+docker run -d -it --name devtest -v "$(pwd)"/target:/app:ro nginx
+</syntaxhighlight>
+
+=== tmpfs mounts ===
+[[File:Types-of-mounts-tmpfs.png|link=]]
+* run container โดยใช้ tmpfs
+<syntaxhighlight lang=powershell>
+docker run -d -it --name tmptest --mount type=tmpfs,destination=/app,tmpfs-mode=1770 nginx
+</syntaxhighlight>
+
+
+== Workshop 6 :  Container data ==
+=== Back up Container data ===
+* สร้าง volume สำหรับเก็บข้อมูล
+<syntaxhighlight lang=powershell>
+docker volume create datavol
+docker volume ls
+</syntaxhighlight>
+
+* สร้าง container สอง container โดยใช้ volume datavol
+<syntaxhighlight lang=powershell>
+docker run -d --name app1 -v datavol:/data nginx:alpine
+docker run -d --name app2 -v datavol:/data nginx:alpine
+</syntaxhighlight>
+
+* เข้าไปที่ shell ของ container แล้วสร้างไฟล์
+<syntaxhighlight lang=powershell>
+docker exec -it app1 sh
+touch /data/app1
+exit
+
+docker exec -it app2 sh
+touch /data/app2
+ls /data
+exit
+</syntaxhighlight>
+
+* run contain โดย mount volume ที่ต้องการ Back up ไปที่ /data แล้ว bind mount folder ปัจจุบันไปที่ /backup แล้วสั่ง tar /data ไปไว้ใน /backup ทำให้ได้ไฟล์ datavol-backup.tar ที่ docker machine host
+<syntaxhighlight lang=powershell>
+docker run --rm -it --mount source=datavol,target=/data --mount type=bind,source=$(pwd),target=/backup alpine tar cvf /backup/datvol-backup.tar /data
+</syntaxhighlight>
+
+* ลบไฟล์ใน container
+<syntaxhighlight lang=powershell>
+docker exec -it app1 sh
+rm /data/*
+ls -l /data/
+exit
+</syntaxhighlight>
+
+* restore ข้อมูลที่ back up ไว้
+<syntaxhighlight lang=powershell>
+docker run --rm -it --mount source=datavol,target=/data --mount type=bind,source=$(pwd),target=/backup alpine sh -c "cd /data && tar xvf /backup/datvol-backup.tar --strip 1"
+</syntaxhighlight>
+
+* ตรวจสอบไฟล์ใน container
+<syntaxhighlight lang=powershell>
+docker exec -it app1 sh
+ls -l /data/
+</syntaxhighlight>
+
+* clean up
+<syntaxhighlight lang=powershell>
+docker stop app1 app2
+docker rm app1 app2
+docker volume rm datavol
+</syntaxhighlight>
+
+=== Share container data across docker machine ===
+* ติดตั้ง plugin
+<syntaxhighlight lang=powershell>
+docker plugin install --grant-all-permissions vieux/sshfs
+</syntaxhighlight>
+* สร้าง volume โดยใช้ sshfs driver
+<syntaxhighlight lang=powershell>
+docker volume create --driver vieux/sshfs -o sshcmd=dockervol@xx.xx.xx.xx:/home/dockervol -o password=**************** sshvol
+</syntaxhighlight>
+
+* run container โดยใช้ volume sshvol
+<syntaxhighlight lang=powershell>
+docker run --rm -it -v sshvol:/data -w /data busybox sh
+</syntaxhighlight>
+
+* ลองสร้างไฟล์ใน container
+* clean up
+<syntaxhighlight lang=powershell>
+docker volume rm sshvol
+</syntaxhighlight>
+
+== Docker Commit ==
+เมื่อต้องการทำ container ที่ใช้งานอยู่เก็บเป็น image สำหรับไว้ใช้ run container ต่อ
+<syntaxhighlight lang=powershell>
+docker commit <container-name> <image-name>:<tag>
+</syntaxhighlight>
+https://docs.docker.com/engine/reference/commandline/commit/
+
+== Docker Build ==
+ในการใช้งานจริง ส่วนใหญ่จะไม่สามารถใช้ image มาตรฐานที่สร้างไว้แล้วมา run container แล้วใช้งานได้ครอบคุมตรงความต้องการ จึงต้องมีการสร้าง image ขึ้นมาใช้งานเองเพื่อให้ตรงกับความต้องการ
+=== Dockerfile ===
+* Dockerfile คือ file ที่รวมคำสั่งที่ใช้สร้าง image ขึ้นมาใช้งานตามความต้องการเฉพาะ เพื่อให้เกิดเป็นมาตรฐานของเราเองในการสร้าง Application หนึ่ง โดยมีคำสั่งที่ใช้งานบ่อย ๆ คือ
+** '''FROM <image>:<tag>''' เป็นการระบุ image ตั้งต้นที่จะใช้งาน
+** '''RUN <shell command>''' คือคำสั่งที่รันขณะ build
+** '''CMD ["executable","param1","param2"]''' เป็นสำสั่งเริ่มต้นเมื่อ image ที่ถูกสร้างขึ้ถูกสั่งให้ run เป็น container หรือเป็น parameter ที่ส่งต่อให้ ENTRYPOINT
+** '''EXPOSE <port> [<port>/<protocol>...]''' เป็นการระบุมาเมื่อ image ที่ถูกสร้างนี้ run เป็น container แล้วจะเปิด port ไหนสำหรับใช้งาน
+** '''ARG <name>[=<default value>]''' เป็นการกำหนดค่าตัวแปรในขณะ build image
+** '''ENV <key>=<value>''' เป็นการกำหนดค่าตัวแปร environment เพื่อใช้งานขณธ build 
+** '''COPY/ADD <source> <destination>''' เป็นการสั่ง copy file หรือ directory จาก docker machine host เข้าไปไว้ใน image หรือ download file มาถ้าใช้คำสั่ง ADD แต่ไม่แนะนำให้ใช้ ใช้ COPY ดีกว่า
+** '''ENTRYPOINT ["executable", "param1", "param2"]''' เป็นคำสั่งที่จะทำงานเมื่อ image ถูก run เป็น container
+** '''WORKDIR /path/to/workdir''' เป็นการระบุ directory เริ่มต้นในการทำงาน RUN, CMD, ENTRYPOINT, COPY ถ้า path ของ WORKDIR ไม่มีอยู่ก่อนจะถูกสร้างขึ้นเอง
+สามารถดูคำสั่งอื่นได้เพิ่มเติมที่ https://docs.docker.com/engine/reference/builder/
+
+=== Dockerfile best practice ===
+* ทำให้เรียบง่าย ไม่ซับซ้อน
+* 1 service 1 container
+* เลือก image เริ่มต้นจากเจ้าของ image ที่เป็นทางการ
+* build image ให้มีขนาดเล็กที่สุด
+** directory ที่ใช้ build ให้แยกกันใช้เฉพาะงาน
+** ใช้เฉพาะ file ที่จำเป็น
+** ติดตั้ง component/library เท่าที่จำเป็นต้องใช้
+* RUN ควรรวบทุกคำสั่งที่ติดตั้ง software มาทำครั้งเดียว
+* ลบ temp file ที่เกิดจากการติดตั้ง software 
+* จัดเรียงคำสั่งให้อ่านง่าย ใช้ \ ในการขึ้นบรรทัดใหม่เพื่อให้ยังเป็นชุดคำสั่งเดิม
+* ระบุ EXPOSE port ทุกครั้ง
+* ระบุ WORKDIR ทุกครั้งก่อน RUN, ENTRYPOINT, CMD, COPY ...
+* https://www.fromlatest.io/ เครื่องมือตรวจสอบ Dockerfile
+<syntaxhighlight lang=dockerfile>
+FROM php:7.3.0-apache-stretch
+
+RUN set -x \
+    && apt-get update \
+    && apt-get install -y libldap2-dev libjpeg-dev libpng-dev libzip-dev libicu-dev libbz2-dev \
+    && docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu \
+    && docker-php-ext-install ldap \
+    && docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr \
+    && docker-php-ext-install gd \
+    && docker-php-ext-install mysqli \
+    && docker-php-ext-install pdo_mysql \    
+    && docker-php-ext-install opcache \
+    && docker-php-ext-install zip \
+    && docker-php-ext-install bz2 \ 
+    && docker-php-ext-install bcmath \
+    && docker-php-ext-install intl \
+    && pecl install apcu \    
+    && echo "extension=apcu.so" > /usr/local/etc/php/conf.d/apcu.ini \
+    #&& apt-get purge -y --auto-remove libldap2-dev libjpeg-dev libpng-dev libzip-dev libicu-dev libbz2-dev \
+    && rm -rf /var/lib/apt/lists/* 
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+RUN a2enmod rewrite
+</syntaxhighlight>
+
+== Workshop 7 : Build image ==
+=== Simple build ===
+* clone source จาก git repository
+<syntaxhighlight lang=powershell>
+git clone https://gitlab.com/supawit/docker-workshop.git
+cd docker-workshop\workshop7-build
+</syntaxhighlight>
+* สร้าง network สำหรับ container
+<syntaxhighlight lang=powershell>
+docker network create --subnet=10.10.0.0/24 --gateway=10.10.0.1 internal
+</syntaxhighlight>
+* build image nodejsapp
+<syntaxhighlight lang=powershell>
+docker build -t mynodejsapp:1.0 nodejs
+</syntaxhighlight>
+* run container จาก image ที่สร้างขึ้น
+<syntaxhighlight lang=powershell>
+docker run --name mynodejsapp -d --net internal mynodejsapp:1.0
+</syntaxhighlight>
+* build image nginx 
+<syntaxhighlight lang=powershell>
+docker build -t mynginx:1.0 nginx
+</syntaxhighlight>
+* run container จาก image ที่สร้างขึ้น
+<syntaxhighlight lang=powershell>
+docker run --name mynginx -d --net internal -p 8080:8080 mynginx:1.0
+</syntaxhighlight>
+* ใช้งาน app จาก container ที่ http://localhost:8080/nodejs
+* review Dockerfile
+* clean up
+<syntaxhighlight lang=powershell>
+docker stop mynodejsapp mynginx
+docker rm mynodejsapp mynginx
+docker rmi mynodejsapp:1.0 mynginx:1.0
+docker network rm internal
+</syntaxhighlight>
+
+=== Multi-stage build ===
+* clone source code ของ angular application ตัวอย่างจาก git repository
+<syntaxhighlight lang=powershell>
+git clone https://github.com/brampeirs/todo-app-angular-7 todoapp/todo-app-angular-7
+</syntaxhighlight>
+
+* build image todo-ng-app
+<syntaxhighlight lang=powershell>
+docker build -t mytodoapp:1.0 todoapp
+</syntaxhighlight>
+
+* run containter จาก image ที่สร้าง
+<syntaxhighlight lang=powershell>
+docker run --name mytodoapp -d -p 8080:80 mytodoapp:1.0
+</syntaxhighlight>
+* ใช้งาน app จาก container ที่ http://localhost:8080
+* review Dockerfile
+* ดู image
+<syntaxhighlight lang=powershell>
+docker images
+</syntaxhighlight>
+* cleane up
+<syntaxhighlight lang=powershell>
+docker stop mytodoapp
+docker rm mytodoapp
+docker image prune
+docker rmi mytodoapp:1.0
+</syntaxhighlight>
+
+== Docker Compose ==
+* เป็นเครื่องมือสร้าง service ที่ประกอบไปด้วยหลาย ๆ Application เป็น Application stack ที่ประกอบด้วยหลาย Component เช่น
+** Application
+** Database
+** Web reverse proxy / Load balance 
+* สามารถควบคุม service start/stop ได้จากจุดเดียว
+* สามารถทำ development environment, automatic deploy to production ได้ง่ายขึ้น
+* การทำ compose มีขั้นตอนคร่าว ๆ คือ
+** สร้าง Dockerfile สำหรับ build image ของแต่ละ component
+** กำหนดค่า running parameter ใน '''docker-compose.yml'''
+** '''docker-compose up'''
+* การติดตั้ง docker-compose https://docs.docker.com/compose/install/
+* ตัวอย่าง docker-compose.yml
+<syntaxhighlight lang=yaml>
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+    - "5000:5000"
+    volumes:
+    - .:/code
+    - logvolume01:/var/log
+    links:
+    - redis
+  redis:
+    image: redis
+volumes:
+  logvolume01: {}
+</syntaxhighlight>
+docker-compose file reference https://docs.docker.com/compose/compose-file/
+* docker-compose command
+<syntaxhighlight lang=powershell>
+Commands:
+  build              Build or rebuild services
+  bundle             Generate a Docker bundle from the Compose file
+  config             Validate and view the Compose file
+  create             Create services
+  down               Stop and remove containers, networks, images, and volumes
+  events             Receive real time events from containers
+  exec               Execute a command in a running container
+  help               Get help on a command
+  images             List images
+  kill               Kill containers
+  logs               View output from containers
+  pause              Pause services
+  port               Print the public port for a port binding
+  ps                 List containers
+  pull               Pull service images
+  push               Push service images
+  restart            Restart services
+  rm                 Remove stopped containers
+  run                Run a one-off command
+  scale              Set number of containers for a service
+  start              Start services
+  stop               Stop services
+  top                Display the running processes
+  unpause            Unpause services
+  up                 Create and start containers
+  version            Show the Docker-Compose version information
+</syntaxhighlight>
+
+== Workshop 8 : Docker Compose ==
+=== node.js ===
+[[File:Docker-compose-nodejs.png|link=]]
+* เข้าไปใน directory '''workshop8-compose\nodejs'''
+* ทำการ run application stack
+<syntaxhighlight lang=powershell>
+docker-compose up -d
+</syntaxhighlight>
+เรียกใช้งาน http://localhost
+* แก้ไขข้อความใน '''hello.js''' แล้วทำการ build image ใหม่และ run application stack ใหม่
+<syntaxhighlight lang=powershell>
+docker-compose up -d --build
+</syntaxhighlight>
+เรียกใช้งาน http://localhost
+* ดูที่สิ่งที่ docker-compose สร้างให้
+<syntaxhighlight lang=powershell>
+docker ps
+docker images
+docker network ls
+</syntaxhighlight>
+* review docker-compose.yml
+* clean up
+<syntaxhighlight lang=powershell>
+docker-compose down
+</syntaxhighlight>
+
+=== php mysql ===
+[[File:Docker-compose-phpmysql.png|link=]]
+* เข้าไปใน directory '''workshop8-compose/phpmysql'''
+<syntaxhighlight lang=powershell>
+docker-compose up -d
+</syntaxhighlight>
+เรียกใช้งาน http://localhost/info.php<br>
+เรียกใช้งาน http://localhost/users.php<br>
+* ดูที่สิ่งที่ docker-compose สร้างให้
+<syntaxhighlight lang=powershell>
+docker ps
+docker images
+docker network ls
+</syntaxhighlight>
+* review docker-compose.yml
+* เปิดใช้งาน phpmyadmin สำหรับจัดการข้อมูล
+<syntaxhighlight lang=powershell>
+docker run --rm -it -p 81:80 -e PMA_HOST=mysql --net phpmysql_phpmysqlinternal phpmyadmin/phpmyadmin
+</syntaxhighlight>
+* clean up
+<syntaxhighlight lang=powershell>
+docker-compose down
+</syntaxhighlight>
+== Demo ==
+[[File:Docker-demo.png|link=]]
+
+== Conclusion ==
+workshop นี้ได้แนะนำถึงการใช้งาน docker เบื้องต้นเหมาะสำหรับผู้ดูแลระบบหรือนักพัฒนาที่จะเริ่มต้นใช้งาน docker เพื่อเพิ่มประสิทธิภาพการทำงานให้ดีกว่าแบบเดิม ๆ
+ที่กล่าวมานี้เพียงพอสำหรับการทำ production ที่ไม่ใหญ่มากยังสามารถดูแบบ manual ได้และลดภาระ operation บางอย่างได้พอสมควร
+ในการใช้งานจริงควรต้องคำนึงถึงการออกแบบสถาปัตยกรรมของ Application โดยนึกถึงการ deploy application ในทางของ docker เป็นหลัก
+รวมถึงการใช้งาน share storage ที่สามารถ scale out ได้เพื่อเก็บข้อมูลภายใน container
+ส่วนการใช้งาน docker ขั้นสูงขึ้นไปคือการทำ cluster docker machine โดยมีการทำงานของ Container Orchestration เช่น '''Docker Swarm''', '''Kubernetes''' 
+ที่สามารถในการจัดการ container จำนวนมากได้ มี High Availability หรือทำ auto scale application ได้ ซึ่งจะกล่าวถึงในโอกาสต่อไป<br><br>
+'''DevOps is a culture, not a role!'''<br>
+[[File:Devops-toolchain.svg.png|link=]]<br>
+https://aws.amazon.com/th/devops/what-is-devops/
