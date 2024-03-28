@@ -1,0 +1,184 @@
+==Preparing System==
+<syntaxhighlight lang=bash>
+
+#Step:1 Operating System and Software Improving
+root@172.18.111.xxx:~# apt update && apt upgrade -y
+
+
+#Step:2 Gluster Server Installing
+root@172.18.111.xxx:~# apt-get install software-properties-common
+root@172.18.111.xxx:~# add-apt-repository ppa:gluster/glusterfs-4.1
+
+root@172.18.111.xxx:~# apt-get update
+root@172.18.111.xxx:~# apt-get -y install glusterfs-server
+
+
+#Step:3 Edit binding adddress
+root@172.18.111.xxx:~# nano /etc/glusterfs/glusterd.vol
+
+volume management
+...
+option transport.socket.bind-address 172.18.111.xxx
+...
+end-volume
+
+
+#Step:4 Start and enable start up
+root@172.18.111.xxx:~# service glusterd start
+root@172.18.111.xxx:~# systemctl enable glusterd
+
+
+#Step:5 Probe Nodes to Cluster
+root@172.18.111.101:~# gluster peer probe 172.18.111.101
+peer probe: success. Probe on localhost not needed
+root@172.18.111.101:~# gluster peer probe 172.18.111.102
+peer probe: success.
+root@172.18.111.101:~# gluster peer probe 172.18.111.103
+peer probe: success.
+root@172.18.111.101:~# gluster peer probe 172.18.111.104
+peer probe: success.
+
+
+#Step:6 Checking peer status==
+root@172.18.111.101:~# gluster peer status
+
+Hostname: 172.18.111.102
+Uuid: 3cdaacc7-cbdb-4209-8ff2-cafe6e4536e3
+State: Peer in Cluster (Connected)
+
+Hostname: 172.18.111.103
+Uuid: e30be633-376f-45e3-8eea-ab88acec98a4
+State: Peer in Cluster (Connected)
+
+Hostname: 172.18.111.104
+Uuid: ea1d45e3-bd82-4ec4-b6fa-830640b8170b
+State: Peer in Cluster (Connected)
+
+
+#Step:7 Checking pool list
+root@172.18.111.101:~# gluster pool list
+
+UUID                                    Hostname        State
+3cdaacc7-cbdb-4209-8ff2-cafe6e4536e3    172.18.111.102  Connected 
+e30be633-376f-45e3-8eea-ab88acec98a4    172.18.111.103  Connected 
+ea1d45e3-bd82-4ec4-b6fa-830640b8170b    172.18.111.104  Connected 
+e2e55fba-fc46-4ed1-9655-b1b1a0b3e439    localhost       Connected 
+</syntaxhighlight>
+
+==GlusterFS : Distributed Glusterfs Volume Setting==
+<syntaxhighlight lang=bash>
+# Create brick Directory for distributed volume
+root@172-18-111-101:~# mkdir -p /glusterfs/distributed
+root@172-18-111-102:~# mkdir -p /glusterfs/distributed
+root@172-18-111-103:~# mkdir -p /glusterfs/distributed
+root@172-18-111-104:~# mkdir -p /glusterfs/distributed
+
+# Create distributed volume 
+root@172-18-111-101:~# gluster volume create vol_distributed transport tcp \
+172.18.111.101:/glusterfs/distributed \
+172.18.111.102:/glusterfs/distributed \
+172.18.111.103:/glusterfs/distributed \
+172.18.111.104:/glusterfs/distributed force
+
+# Start Volume
+root@172-18-111-101:~# gluster volume start vol_distributed
+
+# Checking volume info
+root@172-18-111-101:~# gluster volume info vol_distributed
+
+# Checking volume status
+root@172-18-111-101:~# gluster volume status vol_distributed
+</syntaxhighlight>
+
+==GlusterFS : Distributed Replicated and Striped Glusterfs Volume Setting==
+<syntaxhighlight lang=bash>
+# 2 Replicated volume, each have 2 brick striped
+root@node01:~# mkdir -p /glusterfs/replica-strip
+root@node02:~# mkdir -p /glusterfs/replica-strip 
+root@node03:~# mkdir -p /glusterfs/replica-strip 
+root@node04:~# mkdir -p /glusterfs/replica-strip
+
+root@node01:~# gluster volume create vol_replica-strip replica 2 strip 2 transport tcp \
+node01:/glusterfs/replica-strip \
+node02:/glusterfs/replica-strip \
+node03:/glusterfs/replica-strip \
+node04:/glusterfs/replica-strip force
+</syntaxhighlight>
+
+==GlusterFS : Distributed + Replicated Glusterfs Volume==
+<syntaxhighlight lang=bash>
+# Create brick Directory for Distributed + Replicated volume
+root@node01:~# mkdir -p /glusterfs/dist-replica
+root@node02:~# mkdir -p /glusterfs/dist-replica
+root@node03:~# mkdir -p /glusterfs/dist-replica
+root@node04:~# mkdir -p /glusterfs/dist-replica
+
+# Create Distributed + Replicated volume 
+# [2 bricks in a Replicated group and Distributed belong to Replicated groups]
+root@node01:~# gluster volume create vol_dist-replica replica 2 transport tcp \
+node01:/glusterfs/dist-replica \
+node02:/glusterfs/dist-replica \
+node03:/glusterfs/dist-replica \
+node04:/glusterfs/dist-replica force
+</syntaxhighlight>
+
+==GlusterFS : Distributed Striped Glusterfs Volume Setting==
+<syntaxhighlight lang=bash>
+# 2 Distributed volume, each have 2 brick striped 
+root@node01:~# mkdir -p /glusterfs/diststriped 
+root@node02:~# mkdir -p /glusterfs/diststriped 
+root@node03:~# mkdir -p /glusterfs/diststriped 
+root@node04:~# mkdir -p /glusterfs/diststriped 
+
+root@node01:~# gluster volume create vol_diststriped stripe 2 transport tcp \
+node01:/glusterfs/diststriped  \
+node02:/glusterfs/diststriped  \
+node03:/glusterfs/diststriped  \
+node04:/glusterfs/diststriped force 
+</syntaxhighlight>
+
+==GlusterFS : Replicated Glusterfs Volume Setting==
+<syntaxhighlight lang=bash>
+# Create brick Directory for Replicated volume
+root@172-18-111-101:~# mkdir -p /glusterfs/replica 
+root@172-18-111-101:~# mkdir -p /glusterfs/replica 
+
+# Create Replicated volume 
+root@172-18-111-101:~# gluster volume create vol_replica replica 2 transport tcp \
+172.18.111.101:/glusterfs/replica \
+172.18.111.102:/glusterfs/replica force
+</syntaxhighlight>
+
+==GlusterFS : Striped Glusterfs Volume Setting==
+<syntaxhighlight lang=bash>
+# Create brick Directory for Strip 
+root@node01:~# mkdir -p /glusterfs/striped
+root@node02:~# mkdir -p /glusterfs/striped 
+root@node03:~# mkdir -p /glusterfs/striped 
+root@node04:~# mkdir -p /glusterfs/striped 
+
+# Create volume for Strip a file to 4 brick
+root@node01:~# gluster volume create vol_striped stripe 4 transport tcp \
+node01:/glusterfs/striped \
+node02:/glusterfs/striped \
+node03:/glusterfs/striped \
+node04:/glusterfs/striped force
+</syntaxhighlight>
+
+==GlusterFS : Clients' Settings==
+<syntaxhighlight lang=bash>
+#GlusterFS Native
+root@client:~# apt install glusterfs-client attr
+root@client:~# mkdir /glusterfs
+root@client:~# mount -t glusterfs -o acl 172.18.111.101:/vol_distributed /glusterfs
+
+#NFS mount
+root@client:~# apt-get -y install nfs-common 
+root@client:~# systemctl enable rpcbind 
+root@client:~# service rpcbind start
+root@client:~# mount -t nfs -o vers=3,mountproto=tcp 172.18.111.101:/vol_distributed /glusterfs
+
+#Automatically Mounting Volumes
+root@client:~# nano /etc/fstab
+172.18.111.101:/vol_distributed /glusterfs glusterfs defaults,_netdev 0 0
+</syntaxhighlight>
