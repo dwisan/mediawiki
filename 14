@@ -1,0 +1,56 @@
+
+==edit host to nfs server==
+<syntaxhighlight lang=bash>
+# nano /etc/hosts
+
+172.18.111.40   netfs
+
+# ping netfs
+64 bytes from netfs (172.18.111.40): icmp_seq=1 ttl=64 time=0.353 ms
+64 bytes from netfs (172.18.111.40): icmp_seq=2 ttl=64 time=0.237 ms
+</syntaxhighlight>
+
+==make user home directory==
+
+<syntaxhighlight lang=bash>
+# apt-get update
+# apt-get install nfs-common -y
+
+# mkdir /homefs
+# nano /etc/fstab
+
+  netfs:/data/home /homefs nfs auto 0 0
+
+# mount -a
+# df -TH
+
+Filesystem       Type      Size  Used Avail Use% Mounted on
+netfs:/data/home nfs4      236G  3.1G  221G   2% /homefs
+</syntaxhighlight>
+
+==SSH + PSU Passport Auth.==
+
+<syntaxhighlight lang=bash>
+# apt install libpam-radius-auth
+# nano /etc/pam_radius_auth.conf
+
+server[:port] shared_secret      timeout (s)
+172.18.111.19   {shared_secret}       3
+172.18.111.20   {shared_secret}        3
+
+# nano /etc/pam.d/sshd
+
+Standard Un*x authentication.
+
+auth sufficient /lib/security/pam_radius_auth.so
+@include common-auth
+
+# systemctl restart sshd 
+</syntaxhighlight>
+
+==Add User to System==
+
+<syntaxhighlight lang=bash>
+# addgroup --gid 500 mcs_g
+# useradd -g 500 -u 3000 -d /homefs/User -s /bin/bash user
+</syntaxhighlight>
