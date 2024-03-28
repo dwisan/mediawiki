@@ -1,0 +1,37 @@
+==Setting up the host server==
+<syntaxhighlight lang=bash>
+
+#Step 1: Install NFS Kernel Server
+apt-get update
+apt install nfs-kernel-server
+
+#Step 2: Create the Export Directory
+mkdir -p /mnt/sharedfolder
+chown nobody:nogroup /mnt/sharedfolder
+chmod 777 /mnt/sharedfolder
+
+
+#Step 3: Assign server access to client(s) through NFS export file
+nano /etc/exports
+    /mnt/sharedfolder clientIP(rw,sync,no_subtree_check)
+
+#Step 4: Export the shared directory
+exportfs -a
+
+#Step 5: restart the NFS Kernel server
+systemctl restart nfs-kernel-server
+</syntaxhighlight>
+
+==Configuring the Client Machine==
+<syntaxhighlight lang=bash>
+#Step 1: Install NFS Common
+apt-get update
+apt-get install nfs-common
+
+#Step 2: Create a mount point for the NFS host’s shared folder
+mkdir -p /mnt/sharedfolder_client
+
+#Step 3: Mount the shared directory on the client
+mount 192.168.100.5:/mnt/sharedfolder /mnt/sharedfolder_client
+
+</syntaxhighlight>
