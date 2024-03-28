@@ -1,0 +1,62 @@
+'''OS: Ubuntu 22.04'''
+
+Step 1# Update System
+<syntaxhighlight lang=bash>
+# apt update && apt upgrade -y
+</syntaxhighlight>
+
+Step 2# install a few prerequisite packages which let apt use packages over HTTPS
+<syntaxhighlight lang=bash>
+# apt install apt-transport-https ca-certificates curl software-properties-common
+</syntaxhighlight>
+
+Step 3# add the GPG key for the official Docker repository
+<syntaxhighlight lang=bash>
+# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+</syntaxhighlight>
+
+Step 4# Add the Docker repository to APT sources
+<syntaxhighlight>
+# echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+# apt update
+</syntaxhighlight>
+
+Step 5# Install Docker
+<syntaxhighlight lang=bash>
+# apt install docker-ce
+</syntaxhighlight>
+
+Step 6# Install Docker compose
+<syntaxhighlight lang=bash>
+# mkdir -p ~/.docker/cli-plugins/
+# curl -SL https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
+# chmod +x ~/.docker/cli-plugins/docker-compose
+
+</syntaxhighlight>
+
+Step 7#  Executing the Docker Command Without Sudo
+<syntaxhighlight lang=bash>
+# sudo usermod -aG docker ${USER}
+</syntaxhighlight>
+
+
+Step 8#  Configure docker remote api MODE.
+<syntaxhighlight lang=bash>
+# systemctl stop docker.service
+# cat > /etc/docker/daemon.json
+{"hosts": ["tcp://0.0.0.0:2375", "unix:///var/run/docker.sock"]}
+
+# mkdir -p /etc/systemd/system/docker.service.d/
+# cat > /etc/systemd/system/docker.service.d/override.conf
+ [Service]
+ ExecStart=
+ ExecStart=/usr/bin/dockerd
+
+# systemctl daemon-reload
+# systemctl start docker.service
+</syntaxhighlight>
+
+Step # login to docker local registry
+<syntaxhighlight lang=bash>
+# docker login registry.mcs.psu.ac.th
+</syntaxhighlight>
