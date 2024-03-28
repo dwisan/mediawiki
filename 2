@@ -1,0 +1,42 @@
+Step 1# 
+Create a directory to permanently store images.
+<syntaxhighlight lang=bash>
+# mkdir -p /srv/registry/data
+</syntaxhighlight>
+
+Step 2#
+Create a directory to permanently store certificates and authentication data
+<syntaxhighlight lang=bash>
+# mkdir -p /srv/registry/security
+</syntaxhighlight>
+
+Step 3#
+Install apache2-utils to use htpasswd utility
+<syntaxhighlight lang=bash>
+# apt install apache2-utils
+</syntaxhighlight>
+
+Step 4#
+Create initial username and password
+<syntaxhighlight lang=bash>
+# : | sudo tee /srv/registry/security/htpasswd
+# echo "password" | htpasswd -iB /srv/registry/security/htpasswd admin
+</syntaxhighlight>
+
+Step 5#
+Start the registry container
+<syntaxhighlight lang=bash>
+# docker run -d   -p 443:5000   --name registry   -v /srv/registry/data:/var/lib/registry   -v /srv/registry/security:/etc/security   -e REGISTRY_HTTP_TLS_CERTIFICATE=/etc/security/selfsigned.crt   -e REGISTRY_HTTP_TLS_KEY=/etc/security/selfsigned.key   -e REGISTRY_AUTH=htpasswd   -e REGISTRY_AUTH_HTPASSWD_PATH=/etc/security/htpasswd   -e REGISTRY_AUTH_HTPASSWD_REALM="Registry Realm"   --restart always   registry:2.6.2
+</syntaxhighlight>
+
+Step 6#
+Tag local Debian Stretch image with an additional tag – local repository address.
+<syntaxhighlight lang=bash>
+# docker tag lamp:latest registry.mcs.psu.ac.th/lamp:latest
+</syntaxhighlight>
+
+Step 7#
+Push image to the local repository.
+<syntaxhighlight lang=bash>
+# docker push registry.mcs.psu.ac.th/lamp:latest
+</syntaxhighlight>
