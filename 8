@@ -1,0 +1,42 @@
+Update your repository and your system
+<syntaxhighlight lang=bash>
+# apt update && apt upgrade -y
+</syntaxhighlight>
+
+Install haproxy
+<syntaxhighlight lang=bash>
+# apt install haproxy -y
+</syntaxhighlight>
+
+Edit haproxy configuration
+<syntaxhighlight lang=bash>
+nano /etc/haproxy/haproxy.cfg
+</syntaxhighlight>
+
+Add the below lines to create a frontend configuration for loadbalancer 
+<syntaxhighlight lang=bash>
+frontend fe-apiserver
+   bind 0.0.0.0:6443
+   mode tcp
+   option tcplog
+   default_backend be-apiserver
+
+backend be-apiserver
+   mode tcp
+   option tcplog
+   option tcp-check
+   balance roundrobin
+   default-server inter 10s downinter 5s rise 2 fall 2 slowstart 60s maxconn 250 maxqueue 256 weight 100
+
+       server k8s-master01 172.18.111.211:6443 check
+       server k8s-master02 172.18.111.212:6443 check
+       server k8s-master03 172.18.111.213:6443 check
+</syntaxhighlight>
+
+Restart and Verify haproxy
+<syntaxhighlight lang=bash>
+systemctl restart haproxy
+systemctl status haproxy
+</syntaxhighlight>
+
+Install kubeadm,kubelet and docker on master and worker nodes
