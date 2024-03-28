@@ -1,0 +1,85 @@
+backend Studies_MDB_Cluster
+    mode tcp
+    option tcp-check
+    server 172.18.111.41:3306_LOADBLS 172.18.111.41:3306 check port 3306
+    server 172.18.111.31:3306_RDBMS01 172.18.111.31:3306 check port 3306
+    server 172.18.111.32:3306_RDBMS02 172.18.111.32:3306 check port 3306
+    server 172.18.111.33:3306_RDBMS03 172.18.111.33:3306 check port 3306
+
+
+backend MCS_MDB_Gal_Cluster   
+    mode tcp
+    option tcp-check
+    server 172.18.111.42:3306_LOADBLS 172.18.111.42:3306 check port 3306
+    server 172.18.111.25:3306_RDBMS01 172.18.111.25:3306 check port 3306
+    server 172.18.111.26:3306_RDBMS02 172.18.111.26:3306 check port 3306
+    server 172.18.111.27:3306_RDBMS03 172.18.111.27:3306 check port 3306
+
+backend WebApp_UserApp
+    mode tcp
+    option tcp-check
+    server 172.18.111.30:80_443_LDBLS 172.18.111.30:80 check port 80
+    server 172.18.111.51:801_WebApp01 172.18.111.51:801 check port 801
+    server 172.18.111.52:801_WebApp02 172.18.111.52:801 check port 801
+
+backend WebApp_wiki
+    mode tcp
+    option tcp-check
+    server 172.18.111.35:80_443_LDBLS 172.18.111.30:80 check port 443
+    server 172.18.111.51:802_WikiMed 172.18.111.51:801 check port 802
+    server 172.18.111.52:802_WikiMed 172.18.111.52:801 check port 802
+
+backend Studies_WebApp_dbApp
+    mode tcp
+    option tcp-check
+    server 172.18.111.24_443_LOADBLS 172.18.111.24:443 check port 443
+    server 172.18.111.53_801_dbApp01 172.18.111.53:801 check port 801
+    server 172.18.111.54_801_dbApp02 172.18.111.54:801 check port 801
+
+backend MCS_WebApp_dbApp
+    mode tcp
+    option tcp-check
+    server 172.18.111.18_443_LOADBLS 172.18.111.24:443 check port 443
+    server 172.18.111.53_802_dbApp01 172.18.111.53:802 check port 802
+    server 172.18.111.54_802_dbApp02 172.18.111.54:802 check port 802
+
+backend User_File_System
+    mode tcp
+    option tcp-check
+    server UserFS_2049 172.18.111.40:2049 check port 2049
+    server FS_445 172.18.111.10:445 check port 445
+
+backend MCS_DNS
+    mode tcp
+    option tcp-check
+    server DNS1_53 172.18.111.2:53 check port 53
+    server DNS2_53 172.18.111.7:53 check port 53
+
+backend WIN_DNS
+    mode tcp
+    option tcp-check
+    server WINDNS01_53 172.18.111.3:53 check port 53
+    server WINDNS02_53 172.18.111.5:53 check port 53
+    server WINDNS03_53 172.18.111.9:53 check port 53
+    server WINDNS04_53 172.18.111.12:53 check port 53
+
+backend Linux_Node
+    mode tcp
+    option tcp-check
+    server 172.18.111.43:3000_lbl 172.18.111.43:3000 check port 3000
+    server 172.18.111.101:22_s101 172.18.111.101:22 check port 22
+    server 172.18.111.102:22_s102 172.18.111.102:22 check port 22
+    server 172.18.111.103:22_s103 172.18.111.103:22 check port 22
+    server 172.18.111.104:22_s104 172.18.111.104:22 check port 22
+    server 172.18.111.105:22_s105 172.18.111.105:22 check port 22
+    server 172.18.111.106:22_s106 172.18.111.106:22 check port 22
+    server 172.18.111.107:22_s107 172.18.111.107:22 check port 22
+    server 172.18.111.108:22_s108 172.18.111.108:22 check port 22
+    server 172.18.111.109:22_s109 172.18.111.109:22 check port 22
+    server 172.18.111.110:22_s110 172.18.111.110:22 check port 22
+
+frontend stats
+    bind *:80
+    stats enable
+    stats uri /
+    stats refresh 30s
